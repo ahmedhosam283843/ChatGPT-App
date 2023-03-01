@@ -1,3 +1,4 @@
+
 class AssetManager {
   static String imagePath = "assests/images";
   static String userImage = "$imagePath/person.png";
