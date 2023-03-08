@@ -13,6 +13,7 @@ import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 
+import '../providers/chat_provider.dart';
 import '../providers/models_providers.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -43,11 +44,10 @@ class _ChatScreenState extends State<ChatScreen> {
     super.dispose();
   }
 
-  List<ChatModel> chatList = [];
-
   bool _isTyping = false;
   @override
   Widget build(BuildContext context) {
+    final chatProvider = Provider.of<ChatProvider>(context);
     final modelsProvider = Provider.of<ModelsProvider>(context);
     return Scaffold(
       appBar: AppBar(
@@ -73,11 +73,11 @@ class _ChatScreenState extends State<ChatScreen> {
           Flexible(
             child: ListView.builder(
                 controller: _scrollController,
-                itemCount: chatList.length,
+                itemCount: chatProvider.getChatList.length,
                 itemBuilder: (context, index) {
                   return ChatWidget(
-                    msg: chatList[index].msg,
-                    chatIndex: chatList[index].chatIndex,
+                    msg: chatProvider.getChatList[index].msg,
+                    chatIndex: chatProvider.getChatList[index].chatIndex,
                   );
                 }),
           ),
@@ -102,7 +102,9 @@ class _ChatScreenState extends State<ChatScreen> {
                     style: TextStyle(color: Colors.white),
                     controller: textEditingController,
                     onSubmitted: (value) async {
-                      await sendMessagesFCT(modelsProvider: modelsProvider);
+                      await sendMessagesFCT(
+                          modelsProvider: modelsProvider,
+                          chatProvider: chatProvider);
                     },
                     decoration: InputDecoration.collapsed(
                         hintText: "How can I help you?",
@@ -110,7 +112,9 @@ class _ChatScreenState extends State<ChatScreen> {
                   )),
                   IconButton(
                       onPressed: () async {
-                        await sendMessagesFCT(modelsProvider: modelsProvider);
+                        await sendMessagesFCT(
+                            modelsProvider: modelsProvider,
+                            chatProvider: chatProvider);
                       },
                       icon: Icon(
                         Icons.send,
@@ -125,17 +129,19 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Future<void> sendMessagesFCT({required ModelsProvider modelsProvider}) async {
+  Future<void> sendMessagesFCT(
+      {required ModelsProvider modelsProvider,
+      required ChatProvider chatProvider}) async {
     try {
       setState(() {
-        chatList.add(ChatModel(msg: textEditingController.text, chatIndex: 0));
         _isTyping = true;
+        chatProvider.addUserMessage(msg: textEditingController.text);
         focusNode.unfocus();
         textEditingController.clear();
       });
-      chatList.addAll(await ApiService.sendMessage(
-          message: textEditingController.text,
-          modelId: modelsProvider.getCurrentModel));
+      await chatProvider.sendMessageAndGetAnswers(
+          msg: textEditingController.text,
+          chosenModelId: modelsProvider.getCurrentModel);
       setState(() {});
     } catch (error) {
       log("error message: error");
