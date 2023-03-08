@@ -182,6 +182,8 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  
+
   void scrollListToEnd() {
     _scrollController.animateTo(_scrollController.position.maxScrollExtent,
         duration: Duration(seconds: 1), curve: Curves.easeOut);
