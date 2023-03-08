@@ -1,4 +1,5 @@
 import 'package:chatgpt_app/constants/constants.dart';
+import 'package:chatgpt_app/services/api_sevices.dart';
 import 'package:chatgpt_app/services/assests_manager.dart';
 import 'package:chatgpt_app/services/services.dart';
 import 'package:chatgpt_app/widgets/chat_widget.dart';
@@ -90,7 +91,13 @@ class _ChatScreenState extends State<ChatScreen> {
                           hintStyle: TextStyle(color: Colors.grey)),
                     )),
                     IconButton(
-                        onPressed: () {},
+                        onPressed: () async {
+                          try {
+                            await ApiService.getModels();
+                          } catch (error) {
+                            print("error message: error");
+                          }
+                        },
                         icon: Icon(
                           Icons.send,
                           color: Colors.white,

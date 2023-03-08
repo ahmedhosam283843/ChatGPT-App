@@ -1,3 +1,5 @@
+# Hide key from version control
+api_key.dart
 # Miscellaneous
 *.class
 *.log
