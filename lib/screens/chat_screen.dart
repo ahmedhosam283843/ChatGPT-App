@@ -23,11 +23,13 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  late ScrollController _scrollController;
   late FocusNode focusNode;
   late TextEditingController textEditingController;
 
   @override
   void initState() {
+    _scrollController = ScrollController();
     focusNode = FocusNode();
     textEditingController = TextEditingController();
     super.initState();
@@ -35,6 +37,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
+    _scrollController.dispose();
     focusNode.dispose();
     textEditingController.dispose();
     super.dispose();
@@ -69,6 +72,7 @@ class _ChatScreenState extends State<ChatScreen> {
         children: <Widget>[
           Flexible(
             child: ListView.builder(
+                controller: _scrollController,
                 itemCount: chatList.length,
                 itemBuilder: (context, index) {
                   return ChatWidget(
@@ -136,7 +140,13 @@ class _ChatScreenState extends State<ChatScreen> {
     } catch (error) {
       log("error message: error");
     } finally {
+      scrollListToEnd();
       _isTyping = false;
     }
+  }
+
+  void scrollListToEnd() {
+    _scrollController.animateTo(_scrollController.position.maxScrollExtent,
+        duration: Duration(seconds: 1), curve: Curves.easeOut);
   }
 }
