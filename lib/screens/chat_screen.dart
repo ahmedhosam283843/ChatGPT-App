@@ -132,22 +132,53 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> sendMessagesFCT(
       {required ModelsProvider modelsProvider,
       required ChatProvider chatProvider}) async {
+    if (_isTyping) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: TextWidget(
+            label: "You cant send multiple messages at a time",
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    if (textEditingController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: TextWidget(
+            label: "Please type a message",
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
     try {
+      String msg = textEditingController.text;
       setState(() {
         _isTyping = true;
-        chatProvider.addUserMessage(msg: textEditingController.text);
         focusNode.unfocus();
         textEditingController.clear();
+        chatProvider.addUserMessage(msg: msg);
       });
       await chatProvider.sendMessageAndGetAnswers(
-          msg: textEditingController.text,
-          chosenModelId: modelsProvider.getCurrentModel);
+          msg: msg, chosenModelId: modelsProvider.getCurrentModel);
+
       setState(() {});
     } catch (error) {
-      log("error message: error");
+      log("error $error");
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: TextWidget(
+          label: error.toString(),
+        ),
+        backgroundColor: Colors.red,
+      ));
     } finally {
-      scrollListToEnd();
-      _isTyping = false;
+      setState(() {
+        scrollListToEnd();
+        _isTyping = false;
+      });
     }
   }
 

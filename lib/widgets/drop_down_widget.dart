@@ -1,6 +1,7 @@
 import 'package:chatgpt_app/providers/models_providers.dart';
 import 'package:chatgpt_app/services/api_sevices.dart';
 import 'package:chatgpt_app/widgets/text_widget.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 
 import '../constants/constants.dart';
@@ -15,6 +16,7 @@ class ModelsDrowDownWidget extends StatefulWidget {
 
 class _ModelsDrowDownWidgetState extends State<ModelsDrowDownWidget> {
   String? currentModel;
+  bool isFirstLoading = true;
   @override
   Widget build(BuildContext context) {
     final modelsProvider = Provider.of<ModelsProvider>(context, listen: false);
@@ -22,6 +24,17 @@ class _ModelsDrowDownWidgetState extends State<ModelsDrowDownWidget> {
     return FutureBuilder(
       future: modelsProvider.getAllModels(),
       builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting &&
+            isFirstLoading == true) {
+          isFirstLoading = false;
+          return const FittedBox(
+            child: SpinKitFadingCircle(
+              color: Colors.lightBlue,
+              size: 30,
+            ),
+          );
+        }
+
         if (snapshot.hasError) {
           return Center(
             child: TextWidget(label: snapshot.error.toString()),
